@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My Love Zahra ❤️</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #010101;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+    <script>
+        // 1. إعداد المشهد، الكاميرا، والمحرك
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
+
+        // 2. نظام التحكم باللمس والسحب (ثابتة ولا تتحرك إلا بإصبعك)
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; 
+        controls.dampingFactor = 0.05;
+        controls.maxDistance = 15;    
+        controls.minDistance = 2;     
+
+        // 3. الإضاءة
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+        const sunLight = new THREE.PointLight(0xffaa00, 3, 30);
+        scene.add(sunLight);
+
+        // 4. خلفية النجوم المتناثرة
+        const starsGeometry = new THREE.BufferGeometry();
+        const starsCount = 600;
+        const starPositions = new Float32Array(starsCount * 3);
+        for(let i=0; i < starsCount * 3; i++) {
+            starPositions[i] = (Math.random() - 0.5) * 40;
+        }
+        starsGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+        const starsMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.08 });
+        const starField = new THREE.Points(starsGeometry, starsMaterial);
+        scene.add(starField);
+
+        // 5. إنشاء شمس واقعية متوهجة في المنتصف
+        function createSunTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createRadialGradient(256, 256, 10, 256, 256, 256);
+            grad.addColorStop(0, '#ffffff');
+            grad.addColorStop(0.2, '#ffea00');
+            grad.addColorStop(0.5, '#ff6a00');
+            grad.addColorStop(1, '#ff0000');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 512, 512);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        const sunGeometry = new THREE.SphereGeometry(1.1, 64, 64);
+        const sunMaterial = new THREE.MeshBasicMaterial({ map: createSunTexture() });
+        const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+        scene.add(sun);
+
+        // هالة ضوئية متوهجة للشمس
+        function createGlowTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+            grad.addColorStop(0, 'rgba(255, 150, 0, 1)');
+            grad.addColorStop(0.4, 'rgba(255, 50, 0, 0.5)');
+            grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 256, 256);
+            return new THREE.CanvasTexture(canvas);
+        }
+        const glowMaterial = new THREE.SpriteMaterial({ map: createGlowTexture(), transparent: true, blending: THREE.AdditiveBlending });
+        const sunGlow = new THREE.Sprite(glowMaterial);
+        sunGlow.scale.set(4, 4, 1);
+        scene.add(sunGlow);
+
+        // 6. تجهيز الـ 8 دوائر المخصصة بـ سبايدر مان وهيلو كيتي وسنوبي وكلام حب لـ زهره
+        const planetData = [
+            { type: 'spiderman_kitty', text: "حبيبتي زهره", subtext: "zahra ❤️" },
+            { type: 'snoopy', text: "Te amo zuzi", subtext: "أميرتي زوز 💕" },
+            { type: 'kitty', text: "Me Encantas", subtext: "زوزي وأكثر 🌸" },
+            { type: 'spiderman', text: "I LOVE YOU", subtext: "يا كل ناسي زوز 🖤" },
+            { type: 'love', text: "زهره - زوزي", subtext: "عاشقك للأبد 💘" },
+            { type: 'snoopy', text: "Amor de mi vida", subtext: "كل عام وانتي بخير زوزي 🥰" },
+            { type: 'spiderman_kitty', text: "Eres mi todo", subtext: "نبض قلبي زوز 💓" },
+            { type: 'love', text: "نجمتي اللامعة", subtext: "زوز الغالية ✨" }
+        ];
+
+        function createCustomPlanetTexture(type, text, subtext) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+
+            // تعديل القيم اللونية لتعمل الخلفية الوردية المتوهجة بدون أخطاء برمجية
+            const grad = ctx.createRadialGradient(128, 128, 60, 128, 128, 120);
+            grad.addColorStop(0, 'rgba(20, 0, 10, 0.95)');
+            grad.addColorStop(0.8, 'rgba(255, 20, 147, 0.45)');
+            grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(128, 128, 120, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#ffffff';
+
+            // تخصيص الأيقونات بناءً على النوع ومطابقة الفكرة المطلوبة
+            if (type === 'spiderman_kitty') {
+                ctx.font = '55px Arial';
+                ctx.fillText('🕷️ 🐱', 128, 95); 
+            } else if (type === 'snoopy') {
+                ctx.font = '55px Arial';
+                ctx.fillText('🤍 🐾', 128, 95); 
+            } else if (type === 'kitty') {
+                ctx.font = '55px Arial';
+                ctx.fillText('🎀 🐱', 128, 95); 
+            } else if (type === 'spiderman') {
+                ctx.font = '55px Arial';
+                ctx.fillText('🕷️ 🕸️', 128, 95); 
+            } else {
+                ctx.font = '55px Arial';
+                ctx.fillText('❤️ ✨', 128, 95); 
+            }
+
+            // النص الأساسي المليء بالدلع
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 24px Arial, sans-serif';
+            ctx.fillText(text, 128, 155);
+
+            // النص الفرعي (زهره والعبارات الإضافية والتبريكات)
+            ctx.fillStyle = '#ffb6c1'; 
+            ctx.font = '20px Arial, sans-serif';
+            ctx.fillText(subtext, 128, 195);
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        const orbitRadius = 3.5; 
+
+        planetData.forEach((data, index) => {
+            const texture = createCustomPlanetTexture(data.type, data.text, data.subtext);
+            const material = new THREE.SpriteMaterial({ map: texture });
+            const sprite = new THREE.Sprite(material);
+            
+            sprite.scale.set(1.4, 1.4, 1); 
+            
+            const angle = (index / planetData.length) * Math.PI * 2;
+            
+            // distribution
+            sprite.position.x = Math.cos(angle) * orbitRadius;
+            sprite.position.z = Math.sin(angle) * orbitRadius;
+            
+            scene.add(sprite);
+        });
+
+        // 7. زاوية الكاميرا لمواجهة التصميم بشكل يظهر العمق ثلاثي الأبعاد
+        camera.position.set(0, 1, 7);
+        controls.update();
+
+        // 8. حلقة التحديث المستمر لإبقاء اللمس شغال
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // دوران الشمس حول نفسها
+            sun.rotation.y += 0.003;
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // 9. مرونة حجم الشاشة عند التدوير
+        window.addEventListener('resize', onWindowResize, false);
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+    </script>
+</body>
+</html>
